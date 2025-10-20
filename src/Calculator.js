@@ -1,5 +1,8 @@
 class Calculator {
   calculate(input) {
+    if (input === "") {
+      return 0;
+    }
     const { delimiter, numbersString } = this.parseInput(input);
     const numbers = this.splitByDelimiter(numbersString, delimiter);
 
@@ -28,7 +31,9 @@ class Calculator {
   validate(numbers) {
     numbers.forEach((numStr) => {
       const trimmed = numStr.trim();
-
+      if (trimmed === "") {
+        return;
+      }
       const num = Number(trimmed);
 
       if (isNaN(num)) {
