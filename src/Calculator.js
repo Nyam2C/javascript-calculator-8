@@ -1,8 +1,9 @@
 class Calculator {
   calculate(input) {
-    if (input === "") {
+    if (this.isEmptyInput(input)) {
       return 0;
     }
+
     const { delimiter, numbersString } = this.parseInput(input);
     const numbers = this.splitByDelimiter(numbersString, delimiter);
 
@@ -11,27 +12,56 @@ class Calculator {
     return this.sum(numbers);
   }
 
+  isEmptyInput(input) {
+    return input === "" || input == null;
+  }
+
   parseInput(input) {
     if (input.startsWith("//")) {
-      let delimiterEndIndex = input.indexOf("\n");
-      let skip = 1;
-
-      if (delimiterEndIndex === -1) {
-        delimiterEndIndex = input.indexOf("\\n");
-        skip = 2;
-      }
-
-      const delimiter = input.substring(2, delimiterEndIndex);
-      const numbersString = input.substring(delimiterEndIndex + skip);
-      return { delimiter, numbersString };
+      return this.parseCustomDelimiter(input);
     }
 
-    return { delimiter: ",:", numbersString: input };
+    return {
+      delimiter: [",", ":"].join(""),
+      numbersString: input,
+    };
+  }
+
+  parseCustomDelimiter(input) {
+    let delimiterEndIndex = input.indexOf("\n");
+    let skipLength = 1;
+
+    if (delimiterEndIndex === -1) {
+      delimiterEndIndex = input.indexOf("\\n");
+      skipLength = 2;
+    }
+
+    if (delimiterEndIndex === -1) {
+      throw new Error(
+        "[ERROR] 잘못된 커스텀 구분자 형식입니다. 줄바꿈(\\n)이 필요합니다."
+      );
+    }
+
+    const delimiter = input.substring(2, delimiterEndIndex);
+    const numbersString = input.substring(delimiterEndIndex + skipLength);
+
+    if (delimiter === "") {
+      throw new Error("[ERROR] 커스텀 구분자가 비어 있습니다.");
+    }
+
+    return { delimiter, numbersString };
   }
 
   splitByDelimiter(numbersString, delimiter) {
-    const regex = new RegExp(`[${delimiter}]`);
-    return numbersString.split(regex).filter((str) => str !== "");
+    const escapedDelimiter = delimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`[${escapedDelimiter}]`);
+    const tokens = numbersString.split(regex);
+
+    if (tokens.some((token) => token.trim() === "")) {
+      throw new Error("[ERROR] 빈 값이 포함되어 있습니다.");
+    }
+
+    return tokens;
   }
 
   validate(numbers) {
@@ -53,9 +83,9 @@ class Calculator {
   }
 
   sum(numbers) {
-    return numbers.reduce((acc, numStr) => {
+    return numbers.reduce((sum, numStr) => {
       const trimmed = numStr.trim();
-      return trimmed === "" ? acc : acc + Number(trimmed);
+      return sum + Number(trimmed);
     }, 0);
   }
 }
