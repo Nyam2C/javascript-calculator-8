@@ -13,10 +13,16 @@ class Calculator {
 
   parseInput(input) {
     if (input.startsWith("//")) {
-      let delimiterEndIndex = input.indexOf("\\n");
+      let delimiterEndIndex = input.indexOf("\n");
+      let skip = 1;
+
+      if (delimiterEndIndex === -1) {
+        delimiterEndIndex = input.indexOf("\\n");
+        skip = 2;
+      }
 
       const delimiter = input.substring(2, delimiterEndIndex);
-      const numbersString = input.substring(delimiterEndIndex + 2);
+      const numbersString = input.substring(delimiterEndIndex + skip);
       return { delimiter, numbersString };
     }
 
