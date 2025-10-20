@@ -3,6 +3,8 @@ class Calculator {
     const { delimiter, numbersString } = this.parseInput(input);
     const numbers = this.splitByDelimiter(numbersString, delimiter);
 
+    this.validate(numbers);
+
     return this.sum(numbers);
   }
 
@@ -21,6 +23,22 @@ class Calculator {
   splitByDelimiter(numbersString, delimiter) {
     const regex = new RegExp(`[${delimiter}]`);
     return numbersString.split(regex).filter((str) => str !== "");
+  }
+
+  validate(numbers) {
+    numbers.forEach((numStr) => {
+      const trimmed = numStr.trim();
+
+      const num = Number(trimmed);
+
+      if (isNaN(num)) {
+        throw new Error("[ERROR] 숫자가 아닌 값이 포함되어 있습니다.");
+      }
+
+      if (num < 0) {
+        throw new Error("[ERROR] 음수는 입력할 수 없습니다.");
+      }
+    });
   }
 
   sum(numbers) {
